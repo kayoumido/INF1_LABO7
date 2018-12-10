@@ -3,24 +3,80 @@
 
 using namespace std;
 
+/**
+ * @brief convert a roman numeral to and arabic number
+ *
+ * @param[string] roman numeral to convert
+ * @return[int] arabic number for the given numeral
+ */
 int toArab(string roman);
 
+/**
+ * @brief convert an arabic number into a roman numeral
+ *
+ * @param[int] arab
+ * @return[string] roman numeral for the given number
+ */
 string toRoman(int arab);
 
 /**
- * @brief get the numeric value of a roman symbol
+ * @brief get the numeric value of one of the seven roman numerals
  *
- * @param[char] roman symbol to convert
- * @return[int] the numeric value of a roman symbol
+ * @param[char] roman numeral to get it's numeric value
+ * @return[int] the numeric value of the given numeral
  */
 int getRomanArabValue(char roman);
+
+/**
+ * @brief get the largest roman numeral for a given number
+ * @example 9 --> V, 30 --> X
+ *
+ * @param[int] arab number to get it's largest numeral
+ * @return[char] the roman numeral
+ */
 char getLargestRomanNumeral(int arab);
+
+/**
+ * @brief get the complement of a roman numeral
+ * @note the complement of a numeral, is the numeral that
+ *       helps with addition/subtractions of the numeral
+ *
+ * @example X's complement is I. With it, we can compose values like XI(11) and IX(9)
+ * @param[char] roman numeral to get it's complement
+ * @return[char] the complementary numeral
+ */
 char getRomanNumeralComplement(char roman);
 
-string numerals(char numeral, unsigned repetition);
+/**
+ * @brief compose an additive numeral by repeating a numeral
+ * @example arab number 3 is composed of 3 times the numeral I --> III
+ *
+ * @param[char] numeral to repeat
+ * @param[unsigned] repetition number of repetition
+ * @return[string] a numeral composed of a repetition of another numeral
+ */
+string addNumerals(char numeral, unsigned repetition);
+
+/**
+ * @brief compose a subtractive numeral by using a numeral and it's complement
+ * @example arab number 9 is composed of the numeral X and it's complement I --> IX
+ *
+ * @param[char] numeral
+ * @param[char] complement
+ * @return[string] a numeral composed of a numeral and it's complement
+ */
 string subNumerals(char numeral, char complement);
 
-const int MAX_REPETITION = 4;
+const int REPETITION_OVERFLOW = 4;
+const int SPECIAL_SUBSTRACT = 4;
+
+const char ROMAN_I = 'I';
+const char ROMAN_V = 'V';
+const char ROMAN_X = 'X';
+const char ROMAN_L = 'L';
+const char ROMAN_C = 'C';
+const char ROMAN_D = 'D';
+const char ROMAN_M = 'M';
 
 int main() {
   int input;
@@ -36,10 +92,9 @@ int toArab(string roman) {
 
   for (size_t i = 0; i < roman.length(); ++i) {
     int current = getRomanArabValue(roman.at(i));
-    int next = getRomanArabValue(roman[i + 1]);
 
     // check if we need to subtract the current number
-    if (current < next) current *= -1;
+    if (i + 1 < roman.length() and current < getRomanArabValue(roman[i + 1])) current *= -1;
 
     arabNumber += current;
   }
@@ -64,25 +119,25 @@ string toRoman(int arab) {
     // if the current digit is equal to the arab value,
     // then nothing special is needed.
     if (currentDigit == arabValue) {
-      currentNumeral = numerals(numeral, 1);
+      currentNumeral = addNumerals(numeral, 1);
     } else {
       // calculate the difference between the current digit and the arab value.
       // this difference will be able to determine the number of repetition is needed
       // to build the current digit with it's numeral
       auto difference = static_cast<unsigned>((currentDigit - arabValue) / pow(10, i));
 
-      // if the difference is greater than the MAX_REPETITION or equal to the special case,
+      // if the difference is greater or equal than the REPETITION_OVERFLOW or equal to the special case,
       // then, the numeral is the next largest numeral subtracted by it's complement.
-      if (difference >= MAX_REPETITION or currentDigit == 4 * pow(10, i)) {
+      if (difference >= REPETITION_OVERFLOW or currentDigit == SPECIAL_SUBSTRACT * pow(10, i)) {
         numeral = getLargestRomanNumeral(static_cast<int>(currentDigit + pow(10, i)));
         currentNumeral = subNumerals(numeral, getRomanNumeralComplement(numeral));
       } else {
         //
-        currentNumeral += numerals(numeral, 1);
-        if (numeral == 'V' or numeral == 'L' or numeral == 'D') {
-          currentNumeral += numerals(getRomanNumeralComplement(numeral), difference);
+        currentNumeral += addNumerals(numeral, 1);
+        if (numeral == ROMAN_V or numeral == ROMAN_L or numeral == ROMAN_D) {
+          currentNumeral += addNumerals(getRomanNumeralComplement(numeral), difference);
         } else {
-          currentNumeral += numerals(numeral, difference);
+          currentNumeral += addNumerals(numeral, difference);
         }
       }
     }
@@ -97,26 +152,19 @@ string toRoman(int arab) {
 int getRomanArabValue(char roman) {
 
   switch (roman) {
-    case 'i':
-    case 'I':
+    case ROMAN_I:
       return 1;
-    case 'v':
-    case 'V':
+    case ROMAN_V:
       return 5;
-    case 'x':
-    case 'X':
+    case ROMAN_X:
       return 10;
-    case 'l':
-    case 'L':
+    case ROMAN_L:
       return 50;
-    case 'c':
-    case 'C':
+    case ROMAN_C:
       return 100;
-    case 'd':
-    case 'D':
+    case ROMAN_D:
       return 500;
-    case 'm':
-    case 'M':
+    case ROMAN_M:
       return 1000;
     default:
       return 0;
@@ -126,39 +174,39 @@ int getRomanArabValue(char roman) {
 char getLargestRomanNumeral(int arab) {
 
   if (arab >= 1000) {
-    return 'M';
+    return ROMAN_M;
   } else if (arab >= 500) {
-    return 'D';
+    return ROMAN_D;
   } else if (arab >= 100) {
-    return 'C';
+    return ROMAN_C;
   } else if (arab >= 50) {
-    return 'L';
+    return ROMAN_L;
   } else if (arab >= 10) {
-    return 'X';
+    return ROMAN_X;
   } else if (arab >= 5) {
-    return 'V';
+    return ROMAN_V;
   } else if (arab >= 1) {
-    return 'I';
+    return ROMAN_I;
   }
 }
 
 char getRomanNumeralComplement(char roman) {
   switch (roman) {
-    case 'V':
-    case 'X':
-      return 'I';
-    case 'L':
-    case 'C':
-      return 'X';
-    case 'D':
-    case 'M':
-      return 'C';
+    case ROMAN_V:
+    case ROMAN_X:
+      return ROMAN_I;
+    case ROMAN_L:
+    case ROMAN_C:
+      return ROMAN_X;
+    case ROMAN_D:
+    case ROMAN_M:
+      return ROMAN_C;
     default:
-      return 'I';
+      return ROMAN_I;
   }
 }
 
-string numerals(char numeral, unsigned repetition) {
+string addNumerals(char numeral, unsigned repetition) {
   string string;
   for (unsigned j = 0; j < repetition; ++j) {
     string += numeral;

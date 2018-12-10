@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <sstream>
 
 using namespace std;
 
@@ -67,22 +68,43 @@ string addNumerals(char numeral, unsigned repetition);
  */
 string subNumerals(char numeral, char complement);
 
-const int REPETITION_OVERFLOW = 4;
-const int SPECIAL_SUBSTRACT = 4;
+string checkUserInput(int& inputType, const string &ERROR_MSG, const int &MAX, const int &MIN);
 
-const char ROMAN_I = 'I';
-const char ROMAN_V = 'V';
-const char ROMAN_X = 'X';
-const char ROMAN_L = 'L';
-const char ROMAN_C = 'C';
-const char ROMAN_D = 'D';
-const char ROMAN_M = 'M';
+bool isValidRomanNumeral(const string &input);
+bool isValidArabNumber(const string &input);
+
+const int REPETITION_OVERFLOW = 4;
+const int SPECIAL_SUBTRACT = 4;
+const int MAX_VALUE = 4999;
+const int MIN_VALUE = 1;
+
+enum Roman {
+    I = 'I',
+    V = 'V',
+    X = 'X',
+    L = 'L',
+    C = 'C',
+    D = 'D',
+    M = 'M'
+};
+
+enum InputType {
+  ROMAN,
+  ARAB,
+  ERROR,
+  STOP
+};
 
 int main() {
-  int input;
-  while (cin >> input) {
-    cout << toRoman(input) << endl;
-  }
+  string input;
+  int foo = 0;
+  input = checkUserInput(foo, "BAD BAD", MAX_VALUE, MIN_VALUE);
+
+  cout << input << endl;
+
+/*  while (cin >> input) {
+    cout << isValidRomanNumeral(input) << endl;
+  }*/
 
   return 0;
 }
@@ -94,7 +116,7 @@ int toArab(string roman) {
     int current = getRomanArabValue(roman.at(i));
 
     // check if we need to subtract the current number
-    if (i + 1 < roman.length() and current < getRomanArabValue(roman[i + 1])) current *= -1;
+    if (i + 1 < roman.length() and current < getRomanArabValue(roman.at(i + 1))) current *= -1;
 
     arabNumber += current;
   }
@@ -128,13 +150,13 @@ string toRoman(int arab) {
 
       // if the difference is greater or equal than the REPETITION_OVERFLOW or equal to the special case,
       // then, the numeral is the next largest numeral subtracted by it's complement.
-      if (difference >= REPETITION_OVERFLOW or currentDigit == SPECIAL_SUBSTRACT * pow(10, i)) {
+      if (difference >= REPETITION_OVERFLOW or currentDigit == SPECIAL_SUBTRACT * pow(10, i)) {
         numeral = getLargestRomanNumeral(static_cast<int>(currentDigit + pow(10, i)));
         currentNumeral = subNumerals(numeral, getRomanNumeralComplement(numeral));
       } else {
         //
         currentNumeral += addNumerals(numeral, 1);
-        if (numeral == ROMAN_V or numeral == ROMAN_L or numeral == ROMAN_D) {
+        if (numeral == Roman::V or numeral == Roman::L or numeral == Roman::D) {
           currentNumeral += addNumerals(getRomanNumeralComplement(numeral), difference);
         } else {
           currentNumeral += addNumerals(numeral, difference);
@@ -149,22 +171,35 @@ string toRoman(int arab) {
   return romanNumber;
 }
 
+bool isValidArabNumber(const string &input) {
+
+  int convertedInput = 0;
+  stringstream ss(input);
+  ss >> convertedInput;
+
+  return input.length() == to_string(convertedInput).length();
+}
+
+bool isValidRomanNumeral(const string &input) {
+  return input == toRoman(toArab(input));
+}
+
 int getRomanArabValue(char roman) {
 
   switch (roman) {
-    case ROMAN_I:
+    case Roman::I:
       return 1;
-    case ROMAN_V:
+    case Roman::V:
       return 5;
-    case ROMAN_X:
+    case Roman::X:
       return 10;
-    case ROMAN_L:
+    case Roman::L:
       return 50;
-    case ROMAN_C:
+    case Roman::C:
       return 100;
-    case ROMAN_D:
+    case Roman::D:
       return 500;
-    case ROMAN_M:
+    case Roman::M:
       return 1000;
     default:
       return 0;
@@ -174,35 +209,35 @@ int getRomanArabValue(char roman) {
 char getLargestRomanNumeral(int arab) {
 
   if (arab >= 1000) {
-    return ROMAN_M;
+    return Roman::M;
   } else if (arab >= 500) {
-    return ROMAN_D;
+    return Roman::D;
   } else if (arab >= 100) {
-    return ROMAN_C;
+    return Roman::C;
   } else if (arab >= 50) {
-    return ROMAN_L;
+    return Roman::L;
   } else if (arab >= 10) {
-    return ROMAN_X;
+    return Roman::X;
   } else if (arab >= 5) {
-    return ROMAN_V;
+    return Roman::V;
   } else if (arab >= 1) {
-    return ROMAN_I;
+    return Roman::I;
   }
 }
 
 char getRomanNumeralComplement(char roman) {
   switch (roman) {
-    case ROMAN_V:
-    case ROMAN_X:
-      return ROMAN_I;
-    case ROMAN_L:
-    case ROMAN_C:
-      return ROMAN_X;
-    case ROMAN_D:
-    case ROMAN_M:
-      return ROMAN_C;
+    case Roman::V:
+    case Roman::X:
+      return Roman::I;
+    case Roman::L:
+    case Roman::C:
+      return Roman::X;
+    case Roman::D:
+    case Roman::M:
+      return Roman::C;
     default:
-      return ROMAN_I;
+      return Roman::I;
   }
 }
 
@@ -220,4 +255,21 @@ string subNumerals(char numeral, char complement) {
   string += numeral;
 
   return string;
+}
+
+string checkUserInput(int &inputType, const string &ERROR_MSG, const int &MAX, const int &MIN) {
+  string input;
+  bool valid;
+  do {
+    valid = false;
+    getline(cin, input);
+
+    if (isValidArabNumber(input)) {
+    }
+
+    if (isValidRomanNumeral(input)) {
+    }
+
+  } while(!valid and cout << ERROR_MSG << endl);
+  return input;
 }

@@ -1,3 +1,18 @@
+/*
+-----------------------------------------------------------------------------------
+Laboratoire : Labo07
+Fichier     : Labo07.cpp
+Auteur(s)   : Simon Mattei, Doran Kayoumi, Melodie Uhan
+Date        : 05.12.2018
+
+But         : Convertisseur de nombre Arab en Romain et Romain en Arab
+
+Remarque(s) :
+
+Compilateur : MinGW-g++ <6.3.0>
+-----------------------------------------------------------------------------------
+ */
+
 #include <iostream>
 #include <cmath>
 #include <sstream>
@@ -68,15 +83,17 @@ string addNumerals(char numeral, unsigned repetition);
  */
 string subNumerals(char numeral, char complement);
 
-string checkUserInput(int& inputType, const string &ERROR_MSG, const int &MAX, const int &MIN);
+bool isValidRomanNumeral(const string &input, const int &MAX, const int &MIN);
+bool isValidArabNumber(const string &input, const int &MAX, const int &MIN);
 
-bool isValidRomanNumeral(const string &input);
-bool isValidArabNumber(const string &input);
+int stringToInt(const string &toConvert);
 
 const int REPETITION_OVERFLOW = 4;
 const int SPECIAL_SUBTRACT = 4;
 const int MAX_VALUE = 4999;
 const int MIN_VALUE = 1;
+
+const string ERROR_MESSAGE = "Non valide";
 
 enum Roman {
     I = 'I',
@@ -88,23 +105,23 @@ enum Roman {
     M = 'M'
 };
 
-enum InputType {
-  ROMAN,
-  ARAB,
-  ERROR,
-  STOP
-};
-
 int main() {
   string input;
-  int foo = 0;
-  input = checkUserInput(foo, "BAD BAD", MAX_VALUE, MIN_VALUE);
 
-  cout << input << endl;
+//  for (int i = 1; i <= MAX_VALUE; ++i) {
+//    cout << i << " " << toRoman(i) << " " << toArab(toRoman(i)) << endl;
+//  }
 
-/*  while (cin >> input) {
-    cout << isValidRomanNumeral(input) << endl;
-  }*/
+  while (getline(cin, input) and !input.empty()) {
+    if (isValidArabNumber(input, MAX_VALUE, MIN_VALUE)) {
+      cout << toRoman(stringToInt(input));
+    } else if (isValidRomanNumeral(input, MAX_VALUE, MIN_VALUE)) {
+      cout << toArab(input);
+    } else {
+      cout << ERROR_MESSAGE;
+    }
+    cout << endl;
+  }
 
   return 0;
 }
@@ -134,6 +151,11 @@ string toRoman(int arab) {
 
     int currentDigit = static_cast<int>(arab % 10 * pow(10, i));
 
+    if (currentDigit == 0) {
+      arab /= 10;
+      continue;
+    }
+
     // get the numeral value closest to the current digit and get the arab value of that numeral
     char numeral = getLargestRomanNumeral(currentDigit);
     int arabValue = getRomanArabValue(numeral);
@@ -142,6 +164,11 @@ string toRoman(int arab) {
     // then nothing special is needed.
     if (currentDigit == arabValue) {
       currentNumeral = addNumerals(numeral, 1);
+
+      // check if we're in the thousands
+    } else if (numeral == Roman::M) {
+      // if so, we can repeat the thousands an infinite amount of time.
+      currentNumeral = addNumerals(numeral, static_cast<unsigned>(currentDigit / pow(10, i)));
     } else {
       // calculate the difference between the current digit and the arab value.
       // this difference will be able to determine the number of repetition is needed
@@ -171,17 +198,13 @@ string toRoman(int arab) {
   return romanNumber;
 }
 
-bool isValidArabNumber(const string &input) {
-
-  int convertedInput = 0;
-  stringstream ss(input);
-  ss >> convertedInput;
-
-  return input.length() == to_string(convertedInput).length();
+bool isValidArabNumber(const string &input, const int &MAX, const int &MIN) {
+  return input.length() == to_string(stringToInt(input)).length()
+          and (stringToInt(input) >= MIN and stringToInt(input) <= MAX);
 }
 
-bool isValidRomanNumeral(const string &input) {
-  return input == toRoman(toArab(input));
+bool isValidRomanNumeral(const string &input, const int &MAX, const int &MIN) {
+  return input == toRoman(toArab(input)) and (toArab(input) >= MIN and toArab(input) <= MAX);
 }
 
 int getRomanArabValue(char roman) {
@@ -220,7 +243,7 @@ char getLargestRomanNumeral(int arab) {
     return Roman::X;
   } else if (arab >= 5) {
     return Roman::V;
-  } else if (arab >= 1) {
+  } else {
     return Roman::I;
   }
 }
@@ -257,19 +280,10 @@ string subNumerals(char numeral, char complement) {
   return string;
 }
 
-string checkUserInput(int &inputType, const string &ERROR_MSG, const int &MAX, const int &MIN) {
-  string input;
-  bool valid;
-  do {
-    valid = false;
-    getline(cin, input);
+int stringToInt(const string &toConvert) {
+  int convertedInput = 0;
+  stringstream ss(toConvert);
+  ss >> convertedInput;
 
-    if (isValidArabNumber(input)) {
-    }
-
-    if (isValidRomanNumeral(input)) {
-    }
-
-  } while(!valid and cout << ERROR_MSG << endl);
-  return input;
+  return convertedInput;
 }

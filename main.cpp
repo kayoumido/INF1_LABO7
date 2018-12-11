@@ -131,10 +131,6 @@ enum Roman {
 int main() {
   string input;
 
-//  for (int i = 1; i <= MAX_VALUE; ++i) {
-//    cout << i << " " << toRoman(i) << " " << toArab(toRoman(i)) << endl;
-//  }
-
   while (getline(cin, input) and !input.empty()) {
     if (isValidArabNumber(input, MAX_VALUE, MIN_VALUE)) {
       cout << toRoman(stringToInt(input));

@@ -25,7 +25,7 @@ using namespace std;
  * @param[string] roman numeral to convert
  * @return[int] arabic number for the given numeral
  */
-int toArab(string roman);
+unsigned toArab(string roman);
 
 /**
  * @brief convert an arabic number into a roman numeral
@@ -33,15 +33,15 @@ int toArab(string roman);
  * @param[int] arab
  * @return[string] roman numeral for the given number
  */
-string toRoman(int arab);
+string toRoman(unsigned arab);
 
 /**
  * @brief get the numeric value of one of the seven roman numerals
  *
- * @param[char] roman numeral to get it's numeric value
+ * @param[char] roman numeral to get its numeric value
  * @return[int] the numeric value of the given numeral
  */
-int getRomanArabValue(char roman);
+unsigned getRomanArabValue(char roman);
 
 /**
  * @brief get the largest roman numeral for a given number
@@ -50,7 +50,7 @@ int getRomanArabValue(char roman);
  * @param[int] arab number to get it's largest numeral
  * @return[char] the roman numeral
  */
-char getLargestRomanNumeral(int arab);
+char getLargestRomanNumeral(unsigned arab);
 
 /**
  * @brief get the complement of a roman numeral
@@ -91,7 +91,7 @@ string subNumerals(char numeral, char complement);
  * @param[int] MIN value the numeral can have
  * @return[bool] true if it's a numeral, otherwise false
  */
-bool isValidRomanNumeral(const string &input, const int &MAX, const int &MIN);
+bool isValidRomanNumeral(const string &input, const unsigned &MAX, const unsigned &MIN);
 
 /**
  * @brief check if a value is a valid arabic number
@@ -101,20 +101,20 @@ bool isValidRomanNumeral(const string &input, const int &MAX, const int &MIN);
  * @param[int] MIN value the number can have
  * @return[bool] true if it's a number, otherwise false
  */
-bool isValidArabNumber(const string &input, const int &MAX, const int &MIN);
+bool isValidArabNumber(const string &input, const unsigned &MAX, const unsigned &MIN);
 
 /**
  * @brief convert a sting to int
- * 
+ *
  * @param toConvert value to convert to int
  * @return[int] converted value
  */
-int stringToInt(const string &toConvert);
+unsigned stringToInt(const string &toConvert);
 
-const int REPETITION_OVERFLOW = 4;
-const int SPECIAL_SUBTRACT = 4;
-const int MAX_VALUE = 4999;
-const int MIN_VALUE = 1;
+const unsigned REPETITION_OVERFLOW = 4;
+const unsigned SPECIAL_SUBTRACT = 4;
+const unsigned MAX_VALUE = 4999;
+const unsigned MIN_VALUE = 1;
 
 const string ERROR_MESSAGE = "Non valide";
 
@@ -149,30 +149,30 @@ int main() {
   return 0;
 }
 
-int toArab(string roman) {
-  int arabNumber = 0;
+unsigned toArab(string roman) {
+  unsigned arabNumber = 0;
 
   for (size_t i = 0; i < roman.length(); ++i) {
-    int current = getRomanArabValue(roman.at(i));
+    int current = static_cast<int>(getRomanArabValue(roman.at(i)));
 
     // check if we need to subtract the current number
-    if (i + 1 < roman.length() and current < getRomanArabValue(roman.at(i + 1))) current *= -1;
+    if (i + 1 < roman.length() and current < static_cast<int>(getRomanArabValue(roman.at(i + 1)))) current *= -1;
 
-    arabNumber += current;
+    arabNumber += static_cast<unsigned>(current);
   }
 
   return arabNumber;
 }
 
-string toRoman(int arab) {
+string toRoman(unsigned arab) {
   string romanNumber;
 
   // loop through the arab number digit by digit
   //  e.g. 21 --> first iteration : 1, second : 20
-  for (int i = 0; arab > 0; ++i) {
+  for (unsigned i = 0; arab > 0; ++i) {
     string currentNumeral;
 
-    int currentDigit = static_cast<int>(arab % 10 * pow(10, i));
+    auto currentDigit = static_cast<unsigned>(arab % 10 * pow(10, i));
 
     if (currentDigit == 0) {
       arab /= 10;
@@ -181,7 +181,7 @@ string toRoman(int arab) {
 
     // get the numeral value closest to the current digit and get the arab value of that numeral
     char numeral = getLargestRomanNumeral(currentDigit);
-    int arabValue = getRomanArabValue(numeral);
+    unsigned arabValue = getRomanArabValue(numeral);
 
     // if the current digit is equal to the arab value,
     // then nothing special is needed.
@@ -201,7 +201,7 @@ string toRoman(int arab) {
       // if the difference is greater or equal than the REPETITION_OVERFLOW or equal to the special case,
       // then, the numeral is the next largest numeral subtracted by it's complement.
       if (difference >= REPETITION_OVERFLOW or currentDigit == SPECIAL_SUBTRACT * pow(10, i)) {
-        numeral = getLargestRomanNumeral(static_cast<int>(currentDigit + pow(10, i)));
+        numeral = getLargestRomanNumeral(static_cast<unsigned>(currentDigit + pow(10, i)));
         currentNumeral = subNumerals(numeral, getRomanNumeralComplement(numeral));
       } else {
         //
@@ -221,16 +221,16 @@ string toRoman(int arab) {
   return romanNumber;
 }
 
-bool isValidArabNumber(const string &input, const int &MAX, const int &MIN) {
+bool isValidArabNumber(const string &input, const unsigned &MAX, const unsigned &MIN) {
   return input.length() == to_string(stringToInt(input)).length()
           and (stringToInt(input) >= MIN and stringToInt(input) <= MAX);
 }
 
-bool isValidRomanNumeral(const string &input, const int &MAX, const int &MIN) {
+bool isValidRomanNumeral(const string &input, const unsigned &MAX, const unsigned &MIN) {
   return input == toRoman(toArab(input)) and (toArab(input) >= MIN and toArab(input) <= MAX);
 }
 
-int getRomanArabValue(char roman) {
+unsigned getRomanArabValue(char roman) {
 
   switch (roman) {
     case Roman::I:
@@ -252,7 +252,7 @@ int getRomanArabValue(char roman) {
   }
 }
 
-char getLargestRomanNumeral(int arab) {
+char getLargestRomanNumeral(unsigned arab) {
 
   if (arab >= 1000) {
     return Roman::M;
@@ -303,8 +303,8 @@ string subNumerals(char numeral, char complement) {
   return string;
 }
 
-int stringToInt(const string &toConvert) {
-  int convertedInput = 0;
+unsigned stringToInt(const string &toConvert) {
+  unsigned convertedInput = 0;
   stringstream ss(toConvert);
   ss >> convertedInput;
 

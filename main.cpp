@@ -83,9 +83,32 @@ string addNumerals(char numeral, unsigned repetition);
  */
 string subNumerals(char numeral, char complement);
 
+/**
+ * @brief check if a value is a valid roman numeral
+ *
+ * @param[string] input value to check
+ * @param[int] MAX value the numeral can have
+ * @param[int] MIN value the numeral can have
+ * @return[bool] true if it's a numeral, otherwise false
+ */
 bool isValidRomanNumeral(const string &input, const int &MAX, const int &MIN);
+
+/**
+ * @brief check if a value is a valid arabic number
+ *
+ * @param[string] input value to check
+ * @param[int] MAX value the number can have
+ * @param[int] MIN value the number can have
+ * @return[bool] true if it's a number, otherwise false
+ */
 bool isValidArabNumber(const string &input, const int &MAX, const int &MIN);
 
+/**
+ * @brief convert a sting to int
+ * 
+ * @param toConvert value to convert to int
+ * @return[int] converted value
+ */
 int stringToInt(const string &toConvert);
 
 const int REPETITION_OVERFLOW = 4;
